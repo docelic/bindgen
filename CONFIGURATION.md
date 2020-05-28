@@ -1,9 +1,12 @@
 # Bindgen Configuration Reference
 
+This document describes the syntax and configuration options available in
+bindgen's .yml files. They are used as the config from which the bindings
+are generated.
+
 # Table of Contents
 
 <!--ts-->
-   * [Introduction](#introduction)
    * [YAML syntax](#yaml-syntax)
       * [Conditions](#conditions)
       * [Variables](#variables)
@@ -19,15 +22,9 @@
       * [Generators](#generators)
       * [Find_paths](#find_paths)
 
-<!-- Added by: docelic, at: Thu 28 May 2020 11:36:51 PM CEST -->
+<!-- Added by: docelic, at: Thu 28 May 2020 11:41:52 PM CEST -->
 
 <!--te-->
-
-# Introduction
-
-This document describes the syntax and configuration options available in
-bindgen's .yml files. They are used as the config from which the bindings
-are generated.
 
 # YAML syntax
 
