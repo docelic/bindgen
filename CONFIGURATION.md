@@ -14,13 +14,13 @@
 
 # Introduction
 
-This documents describes configuration options that are available in
-.yml files and used as the project's config from which the bindings
-are generated.
+This document describes the configuration options available in
+bindgen's .yml files. They are used as the project's config
+from which the bindings are generated.
 
 Some configuration values are "templated", meaning that they are
 implicitly of type String and can contain percent signs ("%") in
-their content. All occurences of the percent-sign ("%") will be
+their content. All occurrences of the percent-sign ("%") will be
 replaced by an assumed, computed value relevant for the option.
 
 Additionally, templated strings allow access to environment variables using
@@ -36,7 +36,7 @@ the replacement value if unset.
 
 The options in this list are sorted by typical order of use.
 
-## module (required)
+## Module (required)
 
 Defines the `module X` into which *all* code will be put.
 
@@ -44,11 +44,47 @@ Defines the `module X` into which *all* code will be put.
 module: MyStuff
 ```
 
-## cookbook
+## Cookbook
 
 Defines how conversions in C/C++ shall happen. Use `boehmgc-cpp` for C++,
 or `boehmgc-c` for pure C. Don't worry too much about this setting at first.
 
 ```
 cookbook: boehmgc-cpp # Default!
+```
+
+## Library
+
+Defines the `ld_flags` value for the `@[Link]` directive of the generated `lib`.
+`%` will be replaced by the path to the base-directory of your project, relative
+to the path of the generated `.cr` file.
+
+```
+library: "%/ext/binding.a"
+```
+
+## Processors
+
+Processors pipeline.  See `README.md` for details on each.
+Defaults to the following:
+
+```
+processors:
+  # Graph-refining processors:
+  - default_constructor # Create default constructors where possible
+  - function_class      # Turn OOP-y C APIs into real classes
+  - inheritance         # Mirror inheritance hierarchy from C++
+  - copy_structs        # Copy structures as marked
+  - macros              # Support for macro mapping
+  - functions           # Add non-class functions
+  - filter_methods      # Throw out filtered methods
+  - extern_c            # Directly bind to pure C functions
+  - instantiate_containers # Actually instantiate containers
+  - enums               # Add enums
+  # Preliminary generation processors:
+  - crystal_wrapper     # Create Crystal wrappers
+  - virtual_override    # Allow overriding C++ virtual methods
+  - cpp_wrapper         # Create C++ <-> C wrappers
+  - crystal_binding     # Create `lib` bindings for the C wrapper
+  - sanity_check        # Shows issues, if any
 ```
