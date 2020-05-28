@@ -4,6 +4,13 @@
 
 <!--ts-->
    * [Introduction](#introduction)
+   * [YAML syntax](#yaml-syntax)
+      * [Conditions](#conditions)
+      * [Variables](#variables)
+         * [Examples](#examples)
+      * [Templated Strings](#templated-strings)
+      * [Dependencies](#dependencies)
+         * [Errors](#errors)
    * [Configuration options](#configuration-options)
       * [Module (required)](#module-required)
       * [Cookbook](#cookbook)
@@ -12,7 +19,7 @@
       * [Generators](#generators)
       * [Find_paths](#find_paths)
 
-<!-- Added by: docelic, at: Thu 28 May 2020 11:14:35 PM CEST -->
+<!-- Added by: docelic, at: Thu 28 May 2020 11:26:04 PM CEST -->
 
 <!--te-->
 
@@ -21,6 +28,90 @@
 This document describes the configuration options available in
 bindgen's .yml files. They are used as the project's config
 from which the bindings are generated.
+
+# YAML syntax
+
+Apart from the standard YAML syntax, bindgen's YAML configuration files
+support conditions, variables, templated strings, and loading other YAML files.
+
+**Note**: Conditionals and dependencies are *only* supported in
+*mappings* (`Hash` in Crystal).  Any such syntax encountered in something
+other than a *mapping* will not trigger any special behaviour.
+
+## Conditions
+
+YAML documents can define conditional parts in *mappings* by having a
+conditional key, with *mapping* value.  If the condition matches, the
+*mapping* value will be transparently embedded.  If it does not match, the
+value will be transparently skipped.
+
+Condition keys look like `if_X` or `elsif_X` or `else`.  `X` is the
+condition, and it looks like `Y_is_Z` or `Y_match_Z`.  You can also use
+(one or more) spaces (` `) instead of exactly one underscore (`_`) to
+separate the words, although the underscore notation is more common.
+
+* `Y_is_Z` is true if the variable Y equals Z case-sensitively.
+* `Y_isnt_Z` is true if the variable Y doesn't equal Z case-sensitively.
+* `Y_match_Z` is true if the variable Y is matched by the regular expression
+in `Z`.  The regular expression is created case-sensitively.
+* `Y_newer_or_Z` is true when variable Y is newer or equal (>=) to Z.
+Both variables are treated as versions.
+* `Y_older_or_Z` is true when variable Y is older or equal (=<) to Z.
+Both variables are treated as versions.
+
+A condition block is opened by the first `if`.  Later condition keys can
+use `elsif` or `else` (or `if` to open a *new* condition block).
+
+**Note**: `elsif` or `else` without an `if` will raise an exception.
+
+Their behaviour is like in Crystal: `if` starts a condition block, `elsif`
+starts an alternative condition block, and `else` is used if none of `if` or
+`elsif` matched.  It's possible to mix condition key-values with normal
+key-values.
+
+**Note**: Conditions can be used in every *mapping*, even in *mappings* of
+a conditional.  Each *mapping* acts as its own scope.
+
+## Variables
+
+Variables are set by the user of the class (probably through
+`ConfigReader.from_yaml`).  All variable values are strings.
+
+Variable names are **case-sensitive**.  A missing variable will be treated
+as having an empty value (`""`).
+
+### Examples
+
+```yaml
+foo: # A normal mapping
+  bar: 1
+
+# A condition: Matches if `platform` equals "arm".
+if_platform_is_arm: # In Crystal: `if platform == "arm"`
+  company: ARM et al
+
+# You can mix in values between conditionals.  It won't "break" following
+# elsif or else blocks.
+not_a_condition: Hello
+
+# An elsif: Matches if 1) the previous conditions didn't match
+# 2) its own condition matches.
+elsif_platform_match_x86: # In Crystal: `elsif platform =~ /x86/`
+  company: Many different
+
+elsif_os_is_windows:
+  build: mingw
+
+# An else: Matches if all previous conditions didn't match.
+else:
+  company: No idea
+
+# At any time, you can start a new if sequence.
+"if today is friday": # You can use spaces instead of underscores too
+  hooray: true
+```
+
+## Templated Strings
 
 Some configuration values are "templated", meaning that they are
 implicitly of type String and can contain percent signs ("%") in
@@ -35,6 +126,45 @@ or if it is not set, to `gcc`.  You can also put a percent-sign in there
 to prefer the environment variable before the templated value:
 `{LIBRARY_PATH|%}` will expand to `ENV["LIBRARY_PATH"]`, falling back to
 the replacement value if unset.
+
+## Dependencies
+
+To modularize the configuration, you can load/merge external YAML
+files from within your configuration.
+
+This is triggered by using a key named `<<`, and writing the file name as
+value: `<<: my_dependency.yml`.  The file-extension can also be omitted:
+`<<: my_dependency` in which case an `.yml` extension is assumed.
+
+The dependency path is relative to the currently processed YAML file.
+
+You can also require multiple dependencies into the same *mapping*:
+
+```yaml
+types:
+  Something: true # You can mix dependencies with normal fields.
+  <<: simple_types.yml
+  <<: complex_types.yml
+  <<: ignores.yml
+```
+
+The dependency will be embedded into the open *mapping*: It's transparent
+to the client code.
+
+It's perfectly possible to mix conditionals with dependencies:
+
+```yaml
+if_os_is_windows:
+  <<: windows-specific.yml
+```
+
+### Errors
+
+An exception will be raised if any of the following occur:
+
+* The maximum dependency depth of `10` (`MAX_DEPTH`) is exceeded.
+* The dependency name contains a dot: `../foo.yml` won't work.
+* The dependency name is absolute: `/foo/bar.yml` won't work.
 
 # Configuration options
 
