@@ -106,11 +106,32 @@ generators:
                         # You can compile a small project directly, e.g. using value:
                         # build: "{CXX|c++} -std=c++11 -c -o binding.o -lMyLib my_bindings.cpp"
 
-    # Do you have complex dependencies?  Use a conditional!
-    if_os_is_windows: # Described under "Conditions" in README.md
-       build: mingw-make
-
   # Crystal generator.  Configuration style is exactly the same as for cpp above.
   crystal:
     output: src/my_lib/binding.cr # You'll most likely only need the `output` option.
 ```
+
+## Find_paths
+
+This lets you find paths to your dependencies.  If you don't need it, just
+omit it.
+
+The key is the environment variable that a match will be put into.  These are
+exposed to build-steps, so you can access them in e.g. a Makefile.  You can
+also access these in all templated strings, just as if you set it right
+away.
+
+If an environment variable of this name is already set, and is not empty,
+the match will *not* run!  This allows your users to supply a custom path
+in non-standard installations.
+
+The searches are run in the order they are defined.  Thus, later searches
+have access to the result of previous searches by accessing the environment
+variables.
+
+Attention when using conditionals: The conditionals are evaluated first,
+then the paths are found.  This means that you can't check for a found
+path in a conditional!
+
+All regular expressions in this section match case-sensitive and are
+in multi-line mode (`^` will always match at the beginning of a line).
