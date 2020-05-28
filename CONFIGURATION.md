@@ -88,3 +88,29 @@ processors:
   - crystal_binding     # Create `lib` bindings for the C wrapper
   - sanity_check        # Shows issues, if any
 ```
+
+## Generators
+
+Generators' configuration. These write the actual output to disk.
+
+```
+generators:
+
+  cpp: # C++ generator
+    output: ext/my_bindings.cpp # Output file path  (Mandatory)
+    preamble: |-        # Output file preamble, can be multiline  (Optional)
+      #include "bindgen_helper.hpp"
+    build: make         # Command to run after the generator.  (Optional!)
+                        # Will be executed as-written in the output directory.
+                        # If the command signals failure, bindgen will halt too.
+                        # You can compile a small project directly, e.g. using value:
+                        # build: "{CXX|c++} -std=c++11 -c -o binding.o -lMyLib my_bindings.cpp"
+
+    # Do you have complex dependencies?  Use a conditional!
+    if_os_is_windows: # Described under "Conditions" in README.md
+       build: mingw-make
+
+  # Crystal generator.  Configuration style is exactly the same as for cpp above.
+  crystal:
+    output: src/my_lib/binding.cr # You'll most likely only need the `output` option.
+```
