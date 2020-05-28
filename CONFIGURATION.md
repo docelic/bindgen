@@ -25,14 +25,15 @@
 
 # Introduction
 
-This document describes the configuration options available in
-bindgen's .yml files. They are used as the project's config
-from which the bindings are generated.
+This document describes the syntax and configuration options available in
+bindgen's .yml files. They are used as the config from which the bindings
+are generated.
 
 # YAML syntax
 
-Apart from the standard YAML syntax, bindgen's YAML configuration files
-support conditions, variables, templated strings, and loading other YAML files.
+Bindgen's YAML configuration files support conditions, variables, templated
+strings, and loading other YAML files. This is implemented using a notation
+that is still valid YAML.
 
 **Note**: Conditionals and dependencies are *only* supported in
 *mappings* (`Hash` in Crystal).  Any such syntax encountered in something
@@ -50,14 +51,14 @@ condition, and it looks like `Y_is_Z` or `Y_match_Z`.  You can also use
 (one or more) spaces (` `) instead of exactly one underscore (`_`) to
 separate the words, although the underscore notation is more common.
 
-* `Y_is_Z` is true if the variable Y equals Z case-sensitively.
-* `Y_isnt_Z` is true if the variable Y doesn't equal Z case-sensitively.
+* `Y_is_Z` is true if the variable Y equals Z case-sensitively
+* `Y_isnt_Z` is true if the variable Y doesn't equal Z case-sensitively
 * `Y_match_Z` is true if the variable Y is matched by the regular expression
-in `Z`.  The regular expression is created case-sensitively.
+in `Z`.  The regular expression is created case-sensitively
 * `Y_newer_or_Z` is true when variable Y is newer or equal (>=) to Z.
-Both variables are treated as versions.
+Both variables are treated as versions
 * `Y_older_or_Z` is true when variable Y is older or equal (=<) to Z.
-Both variables are treated as versions.
+Both variables are treated as versions
 
 A condition block is opened by the first `if`.  Later condition keys can
 use `elsif` or `else` (or `if` to open a *new* condition block).
@@ -114,14 +115,17 @@ else:
 ## Templated Strings
 
 Some configuration values are "templated", meaning that they are
-implicitly of type String and can contain percent signs ("%") in
-their content. All occurrences of the percent-sign ("%") will be
+implicitly of type String and can contain "%" and "{...}" in
+their content.
+
+All occurrences of the percent-sign ("%") will be
 replaced by an assumed, computed value relevant for the option.
 
-Additionally, templated strings allow access to environment variables using
-curly braces: `{CC}` would be expanded to the value of `ENV["CC"]`.  It is
+All occurrences of curly braces ("{...}") will be expanded to contents of
+environment variables. `{CC}` would be expanded to the value of `ENV["CC"]`.
+It is
 also possible to provide a fallback value that will be used if the given
-environment variable doesn't exist: `{CC|gcc}` would expand to `ENV["CC"]`,
+environment variable doesn't exist. `{CC|gcc}` would expand to `ENV["CC"]`,
 or if it is not set, to `gcc`.  You can also put a percent-sign in there
 to prefer the environment variable before the templated value:
 `{LIBRARY_PATH|%}` will expand to `ENV["LIBRARY_PATH"]`, falling back to
