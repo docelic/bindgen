@@ -5,10 +5,14 @@
 <!--ts-->
    * [Introduction](#introduction)
    * [Configuration options](#configuration-options)
-      * [module (required)](#module-required)
-      * [cookbook](#cookbook)
+      * [Module (required)](#module-required)
+      * [Cookbook](#cookbook)
+      * [Library](#library)
+      * [Processors](#processors)
+      * [Generators](#generators)
+      * [Find_paths](#find_paths)
 
-<!-- Added by: docelic, at: Thu 28 May 2020 10:54:48 PM CEST -->
+<!-- Added by: docelic, at: Thu 28 May 2020 11:14:35 PM CEST -->
 
 <!--te-->
 
